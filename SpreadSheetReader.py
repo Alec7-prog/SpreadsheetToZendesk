@@ -3,6 +3,7 @@ import requests
 import requests 
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
+from collections import defaultdict
 
 #Only focus on first two colums, which include the first and last name, respectively
 require_cols = [0, 1]
@@ -27,27 +28,36 @@ while x < len(first_names):
    and attatches a value of 0 or 1 to it, depending on whether the name is shortened, contains a special char, or appears on Zendesk (1) or doesn't (0)
 ''' 
 def contactsChecker(names):
-    result = {}
+    data_dict = defaultdict(list)
+
     special_chars = ['.', '-', '\'']
     shortened_names = ['Nelly', 'Anabel', 'Beto', 'Pancho', 'Paco', 'Pepe', 'Alejo', 'Lalo', 'Memo', 'Eddie', 'Frank']
     headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer 3cf9249545d38c1d94c16457731eed492b4ead4d618819de0d633f7c3cb09346'}
 
-    for name in names:
-        if any(x in name for x in special_chars) or any(x in name for x in shortened_names):
-            result[name] = 1
-            continue 
+    y = 0
 
+    for name in names:
+        pair = []
+        pair.append(name)
         url = f'https://api.getbase.com/v2/contacts/?name={name}'
         response = requests.get(url, headers = headers)
 
-        if not response.json()['items']:
-            result[name] = 0
+        if any(x in name for x in special_chars) or any(x in name for x in shortened_names):
+            pair.append(1)
+            data_dict[y] = pair
+            y += 1
+            continue
+        elif not response.json()['items']:
+            pair.append(0)
         elif response:
-            result[name] = 1
+            pair.append(1)
         else:
             raise Exception(f"Non-success status code: {response.status_code}")
-    return result
-
+        
+        data_dict[y] = pair
+        y += 1
+    return data_dict
+ 
 #assigns a color to the row the name is in, yellow or green, depending on the value associated to it
 #0 = green, 1 = yellow
 #this results is written into the original file given
@@ -60,7 +70,8 @@ ws = wb['Sheet1']
 
 x= 2
 for key, val in result_names.items():
-    if val < 1:
+    print(val)
+    if val[1] < 1:
         for cell in ws[f"{x}:{x}"]:
             cell.fill = PatternFill(fgColor="00FF00", fill_type="solid")
     else:
