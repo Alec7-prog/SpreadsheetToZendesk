@@ -1,13 +1,14 @@
 import pandas as pd # type: ignore
-import xlsxwriter # type: ignore
 import requests
 import requests 
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill
 
 #Only focus on first two colums, which include the first and last name, respectively
 require_cols = [0, 1]
 
 #create a dataframe using the information collected from the first and second columns
-required_df = pd.read_excel('test.xlsx', usecols = require_cols, dtype= {'first name':str, 'last name':str})
+required_df = pd.read_excel('mexico commonality list copy.xlsx', usecols = require_cols, dtype= {'first name':str, 'last name':str})
 
 #separate the dataframe into two lists, one with the first names and the other with the last names
 first_names = required_df['first name'].tolist()
@@ -28,14 +29,14 @@ while x < len(first_names):
 def contactsChecker(names):
     result = {}
     special_chars = ['.', '-', '\'']
-    shortened_names = ['Nelly']
+    shortened_names = ['Nelly', 'Anabel', 'Beto', 'Pancho', 'Paco', 'Pepe', 'Alejo', 'Lalo', 'Memo', 'Eddie', 'Frank']
     headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer 3cf9249545d38c1d94c16457731eed492b4ead4d618819de0d633f7c3cb09346'}
 
     for name in names:
         if any(x in name for x in special_chars) or any(x in name for x in shortened_names):
             result[name] = 1
-            continue
-        
+            continue 
+
         url = f'https://api.getbase.com/v2/contacts/?name={name}'
         response = requests.get(url, headers = headers)
 
@@ -47,22 +48,24 @@ def contactsChecker(names):
             raise Exception(f"Non-success status code: {response.status_code}")
     return result
 
-#createes a worksheet object using the xlsxwriter library to create a new excel spreadsheet with updated information
-workbook = xlsxwriter.Workbook('testOut.xlsx')
-worksheet = workbook.add_worksheet()
-
-#writes in every name from result_names (should be all of the names that were originally given) in the first column
-#also assigns a color to the row the name is in, yellow or green, depending on the value associated to it 
-# 0 = green, 1 = yellow
+#assigns a color to the row the name is in, yellow or green, depending on the value associated to it
+#0 = green, 1 = yellow
+#this results is written into the original file given
 result_names = contactsChecker(check_names)
-x= 1
+
+#test to generate output on original file
+file = 'mexico commonality list copy.xlsx'
+wb = load_workbook(filename = file)
+ws = wb['Sheet1']
+
+x= 2
 for key, val in result_names.items():
-    worksheet.write(x, 0, key)
     if val < 1:
-        worksheet.set_row(x, cell_format = workbook.add_format({'bg_color' : "#00FF00"}))
+        for cell in ws[f"{x}:{x}"]:
+            cell.fill = PatternFill(fgColor="00FF00", fill_type="solid")
     else:
-        worksheet.set_row(x, cell_format = workbook.add_format({'bg_color' : '#FFFF00'}))
+        for cell in ws[f"{x}"]:
+            cell.fill = PatternFill(fgColor="FFFF00", fill_type="solid")
     x += 1
 
-#closes the workbook
-workbook.close()
+wb.save(filename=file)
