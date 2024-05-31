@@ -8,30 +8,35 @@ from collections import defaultdict
 #Only focus on first two colums, which include the first and last name, respectively
 require_cols = [0, 1]
 
-#create a dataframe using the information collected from the first and second columns
+#Create a dataframe using the information collected from the first and second columns
 required_df = pd.read_excel('mexico commonality list copy.xlsx', usecols = require_cols, dtype= {'first name':str, 'last name':str})
 
-#separate the dataframe into two lists, one with the first names and the other with the last names
+#Separate the dataframe into two lists, one with the first names and the other with the last names
 first_names = required_df['first name'].tolist()
 last_names = required_df['last name'].tolist()
 
-#create a list that will hold the first and last names of each person together
+#Create a list that will hold the first and last names of each person together
 check_names = []
 
-#go through every name in first_names, concatenate the corresponding last_name to it, and store it in check_names
+#Go through every name in first_names, concatenate the corresponding last_name to it, and store it in check_names
 x = 0
 while x < len(first_names):
     check_names.append(first_names[x] + " " + last_names[x])
     x += 1
 
-'''Using the Zendesk Sell Contacts API, this function generates a dictionary, based on the check_names list, that only holds names as keys, 
-   and attatches a value of 0 or 1 to it, depending on whether the name is shortened, contains a special char, or appears on Zendesk (1) or doesn't (0)
+'''Using the Zendesk Sell Contacts API, this function generates a dictionary, based on the check_names list, that holds index values as keys and lists as values.
+   The each list holds two values, the name of the person and an int (0 or 1).
+   If the name is shortened, contains a special char, or appears on Zendesk it will be a 1. but if it isn't any of those it is a 0.
 ''' 
 def contactsChecker(names):
     data_dict = defaultdict(list)
 
+    #Any special characters that might be included in a name
+    #Also any possible shortnames that could be included - This could be improved by using AI to seek out potential nicknames, instead of using a list
     special_chars = ['.', '-', '\'']
     shortened_names = ['Nelly', 'Anabel', 'Beto', 'Pancho', 'Paco', 'Pepe', 'Alejo', 'Lalo', 'Memo', 'Eddie', 'Frank']
+
+    #Access to the Zendesk API - go to https://developer.zendesk.com/documentation/sales-crm/first-call/ for more info
     headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer 3cf9249545d38c1d94c16457731eed492b4ead4d618819de0d633f7c3cb09346'}
 
     y = 0
@@ -39,6 +44,8 @@ def contactsChecker(names):
     for name in names:
         pair = []
         pair.append(name)
+
+        # Go to https://developer.zendesk.com/api-reference/sales-crm/resources/contacts/ for more info
         url = f'https://api.getbase.com/v2/contacts/?name={name}'
         response = requests.get(url, headers = headers)
 
@@ -58,12 +65,13 @@ def contactsChecker(names):
         y += 1
     return data_dict
  
-#assigns a color to the row the name is in, yellow or green, depending on the value associated to it
-#0 = green, 1 = yellow
-#this results is written into the original file given
+
 result_names = contactsChecker(check_names)
 
-#test to generate output on original file
+#assigns a color to the row the name is in, yellow or green, depending on the value associated to it
+#0 = green, 1 = yellow
+#this results is built into the original file given
+
 file = 'mexico commonality list copy.xlsx'
 wb = load_workbook(filename = file)
 ws = wb['Sheet1']
