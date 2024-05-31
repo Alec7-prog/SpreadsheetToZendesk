@@ -70,7 +70,6 @@ ws = wb['Sheet1']
 
 x= 2
 for key, val in result_names.items():
-    print(val)
     if val[1] < 1:
         for cell in ws[f"{x}:{x}"]:
             cell.fill = PatternFill(fgColor="00FF00", fill_type="solid")
