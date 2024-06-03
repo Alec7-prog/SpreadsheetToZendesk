@@ -37,7 +37,7 @@ def contactsChecker(names):
     shortened_names = ['Nelly', 'Anabel', 'Beto', 'Pancho', 'Paco', 'Pepe', 'Alejo', 'Lalo', 'Memo', 'Eddie', 'Frank']
 
     #Access to the Zendesk API - go to https://developer.zendesk.com/documentation/sales-crm/first-call/ for more info
-    headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer 3cf9249545d38c1d94c16457731eed492b4ead4d618819de0d633f7c3cb09346'}
+    headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer 3be6c028190100725e81b1d626a3238d90fd96a0a58e24fd58b5183b83ca75a8'}
 
     y = 0
 
