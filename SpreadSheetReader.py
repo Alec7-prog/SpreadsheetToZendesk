@@ -1,5 +1,4 @@
 import pandas as pd # type: ignore
-import requests
 import requests 
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
@@ -37,7 +36,7 @@ def contactsChecker(names):
     shortened_names = ['Nelly', 'Anabel', 'Beto', 'Pancho', 'Paco', 'Pepe', 'Alejo', 'Lalo', 'Memo', 'Eddie', 'Frank']
 
     #Access to the Zendesk API - go to https://developer.zendesk.com/documentation/sales-crm/first-call/ for more info
-    headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer 3be6c028190100725e81b1d626a3238d90fd96a0a58e24fd58b5183b83ca75a8'}
+    headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer 2f3f4f828ee4035c73cd397bf25852d104b4842a815c8963d4194b4d56b1d259'}
 
     y = 0
 
